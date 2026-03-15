@@ -1,0 +1,7 @@
+id=disable-fp-hal
+name=Disable Fingerprint HAL (rhodei)
+version=v1.0
+versionCode=1
+author=LittleFellow
+description=Stops fingerprint HAL retry loop on Moto G62 5G (rhodei/SM6375). Masks android.hardware.fingerprint feature flag. Project Infinity / Android 16 compatible.
+updateJson=
