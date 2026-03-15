@@ -1,82 +1,36 @@
-# Disable Fingerprint HAL (rhodei)
+# Disable Fingerprint HAL for Moto G62 5G (rhodei)
 
-A Magisk module designed to stop the infinite initialization retry loop caused by physically damaged or malfunctioning fingerprint sensors.
+[![Magisk Module](https://img.shields.io/badge/Magisk-Module-00BFA5?style=for-the-badge&logo=magisk)](https://github.com/topics/magisk-module)
+[![Android 16](https://img.shields.io/badge/Android-16%20(Project%20Infinity)-3DDC84?style=for-the-badge&logo=android)](https://www.android.com/)
+[![Device: Moto G62 5G](https://img.shields.io/badge/Device-Moto%20G62%205G-512BD4?style=for-the-badge&logo=motorola)](https://forum.xda-developers.com/f/moto-g62-5g.12719/)
 
-By preventing the system from attempting to communicate with the failed hardware, this module eliminates associated logcat spam, unnecessary CPU wakeups, and device heating.
+A Magisk module that disables the fingerprint HAL on Moto G62 5G (rhodei) running Project Infinity / Android 16, specifically designed to fix an **infinite fingerprint HAL retry loop** caused by a physically damaged sensor.
 
-> ⚠️ **Disclaimer**
-> This module completely disables all fingerprint functionality. Use this only if your sensor is physically broken or you no longer wish to use biometric authentication.
+## 📱 Device Information
 
----
+- **Device:** Moto G62 5G
+- **Codename:** rhodei
+- **Processor:** Snapdragon 695 (SM6375)
+- **ROM:** Project Infinity / Android 16
+- **Author:** LittleFellow ([@RonakPandiya](https://github.com/RonakPandiya) | [@little_fellow](https://t.me/little_fellow) on Telegram)
 
-## How It Works
+## 🔍 The Problem
 
-The module utilizes Magisk's overlay system to mask the `android.hardware.fingerprint` feature flag within `system/vendor/etc/permissions/`.
+A physically damaged fingerprint sensor causes the Fingerprint HAL to enter an infinite retry loop. This manifests as:
 
-By removing this flag at boot:
-- `FingerprintService` does not attempt to construct the `FingerprintProvider`
-- The HIDL services (`android.hardware.biometrics.fingerprint@2.1-focalservice` and `ets2`) are never triggered
-- The `BiometricScheduler` remains idle, preventing the "retry-on-fail" loop that normally causes high power consumption
+- Continuous logcat spam from FingerprintService
+- Excessive battery drain
+- SystemUI lag or freezes
+- BiometricScheduler constantly attempting to start
 
----
+## 💡 The Solution
 
-## Compatibility
+This module masks the fingerprint hardware feature by overlaying an empty permission file in Magisk's `system/vendor/etc/permissions/` directory. This prevents:
 
-| Property | Value |
-|---|---|
-| Device | Motorola Moto G62 5G (`rhodei`) |
-| Chipset | Snapdragon 695 (SM6375) |
-| ROMs | Project Infinity (Android 16), most AOSP-based ROMs |
-| Android | Tested on Android 16 |
+1. FingerprintService from constructing FingerprintProvider/defaultHIDL
+2. BiometricScheduler from attempting to start
+3. All fingerprint-related system calls
 
----
+## ⚙️ How It Works
 
-## Installation
-
-1. Download the latest `disable-fp-hal-v1.0.zip` from the [Releases](../../releases) section
-2. Open the **Magisk App** (or Kitsune Mask / APatch)
-3. Go to the **Modules** tab
-4. Select **Install from storage** and pick the downloaded ZIP
-5. Reboot your device
-
----
-
-## Verification
-
-After reboot, confirm the module is working:
-
-```bash
-# 1. Feature flag should be gone
-adb shell pm list features | grep fingerprint
-# Expected: no output
-
-# 2. Loop should be dead
-adb logcat -d | grep HidlToAidlSensorAdapter
-# Expected: no output
-
-# 3. FingerprintService should show nothing
-adb shell dumpsys fingerprint 2>/dev/null | head -5
-# Expected: empty or "No fingerprint service"
-```
-
----
-
-## FAQ
-
-**Q: Will my battery life improve?**
-If your device was previously heating up due to `FingerprintService` retries, you should see a significant improvement in standby battery life and lower idle CPU usage.
-
-**Q: Can I still use Face Unlock?**
-Yes. This module only masks the fingerprint flag; other biometric services remain unaffected.
-
-**Q: How do I revert the changes?**
-Simply uninstall the module from the Magisk app and reboot.
-
----
-
-## Credits & Support
-
-- **Author:** LittleFellow
-- **Telegram:** [@little_fellow](https://t.me/little_fellow)
-- **GitHub:** [RonakPandiya](https://github.com/RonakPandiya)
-- **License:** [GPL-3.0](LICENSE)
+The module uses Magisk's overlay system to replace the fingerprint permission file:
